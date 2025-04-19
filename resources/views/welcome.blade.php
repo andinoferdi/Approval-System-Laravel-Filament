@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Approval Pengajuan</title>
-    <!-- Google Fonts - Plus Jakarta Sans -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    <!-- Google Fonts - Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -17,8 +17,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.155.0/three.min.js"></script>
     <!-- Lottie for vector animations -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+    <!-- AOS (Animate On Scroll) -->
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ asset('css/welcome.css') }}">
+    <link rel="shortcut icon" href="{{ asset('images/logo.png') }}" type="image/x-icon">
 </head>
 
 <body class="bg-white text-accent-800 min-h-screen">
@@ -32,15 +36,17 @@
     <section class="relative min-h-screen flex items-center pt-16 overflow-hidden" id="hero">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div class="text-center lg:text-left" data-aos="fade-right">
+                <div class="text-center lg:text-left" data-aos="fade-right" data-aos-duration="1000">
                     <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-6 leading-tight">
                         <span class="gradient-text">Sistem Approval</span> Pengajuan Modern
                     </h1>
-                    <p class="mt-6 text-xl text-accent-600 max-w-2xl mx-auto lg:mx-0">
+                    <p class="mt-6 text-xl text-accent-600 max-w-2xl mx-auto lg:mx-0" data-aos="fade-right"
+                        data-aos-delay="200" data-aos-duration="1000">
                         Transformasi digital untuk proses pengajuan dan persetujuan yang lebih efisien, transparan, dan
                         terukur.
                     </p>
-                    <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                    <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
+                        data-aos="fade-up" data-aos-delay="400" data-aos-duration="1000">
                         <a href="/dashboard"
                             class="group bg-gradient-to-r from-primary-500 to-secondary-500 text-white px-8 py-4 text-lg rounded-full transition-all duration-300 transform hover:scale-105 inline-flex items-center justify-center shadow-lg hover:shadow-xl">
                             Mulai Sekarang
@@ -53,7 +59,7 @@
                         </a>
                     </div>
                 </div>
-                <div class="relative" data-aos="fade-left">
+                <div class="relative" data-aos="fade-left" data-aos-duration="1200">
                     <div class="lottie-container" id="hero-animation"></div>
                     <div
                         class="absolute -bottom-10 -right-10 w-40 h-40 bg-primary-100 rounded-full filter blur-3xl opacity-30 animate-pulse-slow">
@@ -74,7 +80,7 @@
     <!-- Workflow Section -->
     <section class="py-20 bg-accent-50" id="workflow">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
+            <div class="text-center mb-16" data-aos="fade-up" data-aos-duration="800">
                 <h2 class="text-3xl sm:text-4xl font-bold mb-4">Alur Proses Pengajuan</h2>
                 <p class="text-accent-600 max-w-2xl mx-auto">Sistem kami menyederhanakan proses pengajuan dengan alur
                     kerja yang terstruktur dan transparan.</p>
@@ -84,7 +90,8 @@
                     class="hidden md:block flow-line left-[calc(12.5%-30px)] right-[calc(12.5%-30px)] md:left-[calc(25%-40px)] md:right-[calc(25%-40px)]">
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-8 relative z-10">
-                    <div class="flow-card glass-card rounded-2xl p-6 active" id="flow-card-1">
+                    <div class="flow-card glass-card rounded-2xl p-6 active" id="flow-card-1" data-aos="zoom-in"
+                        data-aos-duration="800" data-aos-delay="100">
                         <div
                             class="w-12 h-12 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-bold text-xl mb-4">
                             1</div>
@@ -92,7 +99,8 @@
                         <p class="text-accent-600">Pegawai mengisi form pengajuan digital dan melampirkan dokumen
                             pendukung yang diperlukan.</p>
                     </div>
-                    <div class="flow-card glass-card rounded-2xl p-6" id="flow-card-2">
+                    <div class="flow-card glass-card rounded-2xl p-6" id="flow-card-2" data-aos="zoom-in"
+                        data-aos-duration="800" data-aos-delay="200">
                         <div
                             class="w-12 h-12 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-bold text-xl mb-4">
                             2</div>
@@ -100,7 +108,8 @@
                         <p class="text-accent-600">Atasan menerima notifikasi dan meninjau pengajuan dengan detail
                             lengkap sebelum memberikan keputusan.</p>
                     </div>
-                    <div class="flow-card glass-card rounded-2xl p-6" id="flow-card-3">
+                    <div class="flow-card glass-card rounded-2xl p-6" id="flow-card-3" data-aos="zoom-in"
+                        data-aos-duration="800" data-aos-delay="300">
                         <div
                             class="w-12 h-12 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-bold text-xl mb-4">
                             3</div>
@@ -108,7 +117,8 @@
                         <p class="text-accent-600">Pengajuan yang disetujui atasan langsung diteruskan ke kepala
                             departemen untuk ditinjau lebih lanjut.</p>
                     </div>
-                    <div class="flow-card glass-card rounded-2xl p-6" id="flow-card-4">
+                    <div class="flow-card glass-card rounded-2xl p-6" id="flow-card-4" data-aos="zoom-in"
+                        data-aos-duration="800" data-aos-delay="400">
                         <div
                             class="w-12 h-12 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-bold text-xl mb-4">
                             4</div>
@@ -125,22 +135,22 @@
     <footer class="py-12 border-t border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
-                <div>
+                <div data-aos="fade-up" data-aos-duration="800" data-aos-delay="100">
                     <div class="flex items-center space-x-2 mb-6">
                         <span class="font-bold text-xl">Sistem Approval Pengajuan</span>
                     </div>
 
                     <div class="flex space-x-4">
                         <a href="#" class="text-accent-600 hover:text-primary-600 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
-                                viewBox="0 0 24 24">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                fill="currentColor" viewBox="0 0 24 24">
                                 <path
                                     d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" />
                             </svg>
                         </a>
                         <a href="#" class="text-accent-600 hover:text-primary-600 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
-                                viewBox="0 0 24 24">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                fill="currentColor" viewBox="0 0 24 24">
                                 <path
                                     d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
                             </svg>
@@ -154,7 +164,7 @@
                         </a>
                     </div>
                 </div>
-                <div>
+                <div data-aos="fade-up" data-aos-duration="800" data-aos-delay="200">
                     <h4 class="font-bold text-lg mb-6">Produk</h4>
                     <ul class="space-y-4">
                         <li><a href="#"
@@ -167,7 +177,7 @@
                                 class="text-accent-600 hover:text-primary-600 transition-colors">Roadmap</a></li>
                     </ul>
                 </div>
-                <div>
+                <div data-aos="fade-up" data-aos-duration="800" data-aos-delay="300">
                     <h4 class="font-bold text-lg mb-6">Perusahaan</h4>
                     <ul class="space-y-4">
                         <li><a href="#" class="text-accent-600 hover:text-primary-600 transition-colors">Tentang
@@ -180,7 +190,7 @@
                                 class="text-accent-600 hover:text-primary-600 transition-colors">Kontak</a></li>
                     </ul>
                 </div>
-                <div>
+                <div data-aos="fade-up" data-aos-duration="800" data-aos-delay="400">
                     <h4 class="font-bold text-lg mb-6">Dukungan</h4>
                     <ul class="space-y-4">
                         <li><a href="#"
@@ -216,6 +226,18 @@
 
     <!-- Custom JS -->
     <script src="{{ asset('js/welcome.js') }}"></script>
+
+    <!-- Initialize AOS -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            AOS.init({
+                once: false,
+                mirror: true,
+                anchorPlacement: 'top-bottom',
+                offset: 120
+            });
+        });
+    </script>
 </body>
 
 </html>
