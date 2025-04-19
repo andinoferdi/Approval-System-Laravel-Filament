@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class Pengajuan extends Model
 {
@@ -77,6 +78,18 @@ class Pengajuan extends Model
             ->max('level') ?? 0;
             
         return $maxDisetujuiLevel + 1;
+    }
+    
+    /**
+     * Mendapatkan URL dokumen pendukung
+     */
+    public function getDocumentUrl(): ?string
+    {
+        if (!$this->dokumen_pendukung) {
+            return null;
+        }
+        
+        return asset('storage/' . $this->dokumen_pendukung);
     }
     
     /**

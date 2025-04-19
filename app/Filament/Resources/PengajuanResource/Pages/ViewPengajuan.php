@@ -9,9 +9,13 @@ use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Forms;
+use Filament\Infolists\Components;
+use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ViewPengajuan extends ViewRecord
 {
@@ -23,6 +27,70 @@ class ViewPengajuan extends ViewRecord
         $pengajuan = $this->getRecord();
         
         return 'Pengajuan #' . $pengajuan->id;
+    }
+    
+    public function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Components\Section::make('Informasi Pengajuan')
+                    ->schema([
+                        Components\TextEntry::make('user.name')
+                            ->label('Nama Pegawai'),
+                        Components\TextEntry::make('user.position')
+                            ->label('Jabatan'),
+                        Components\TextEntry::make('user.department')
+                            ->label('Departemen'),
+                        Components\TextEntry::make('kegiatan')
+                            ->label('Nama Kegiatan'),
+                        Components\TextEntry::make('jadwal_mulai')
+                            ->label('Jadwal Mulai')
+                            ->dateTime(),
+                        Components\TextEntry::make('jadwal_akhir')
+                            ->label('Jadwal Selesai')
+                            ->dateTime(),
+                        Components\TextEntry::make('status')
+                            ->label('Status')
+                            ->formatStateUsing(fn (Pengajuan $record) => $record->getStatusLabelAttribute()),
+                    ])
+                    ->columns(2),
+                    
+                Components\Section::make('Dokumen Pendukung')
+                    ->schema([
+                        Components\TextEntry::make('dokumen_pendukung')
+                            ->label('Dokumen')
+                            ->formatStateUsing(function ($state, Pengajuan $record) {
+                                if (empty($state)) {
+                                    return 'Tidak ada dokumen';
+                                }
+                                
+                                $url = asset('storage/' . $record->dokumen_pendukung);
+                                $extension = pathinfo($record->dokumen_pendukung, PATHINFO_EXTENSION);
+                                $isImage = in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+                                
+                                if ($isImage) {
+                                    return "
+                                    <div>
+                                        <img src='{$url}' alt='Dokumen Pendukung' class='max-w-lg rounded shadow-sm mb-2' />
+                                        <div>
+                                            <a href='{$url}' target='_blank' class='text-primary-600 hover:text-primary-500'>
+                                                Lihat Gambar Asli
+                                            </a>
+                                        </div>
+                                    </div>";
+                                } else {
+                                    return "<a href='{$url}' target='_blank' class='inline-flex items-center justify-center gap-1.5 font-medium rounded-lg bg-primary-600 text-white px-3 py-1 text-sm'>
+                                        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor' class='w-5 h-5'>
+                                            <path d='M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z' />
+                                            <path d='M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z' />
+                                        </svg>
+                                        Download Dokumen
+                                    </a>";
+                                }
+                            })
+                            ->html(),
+                    ]),
+            ]);
     }
     
     protected function mutateFormData(array $data): array

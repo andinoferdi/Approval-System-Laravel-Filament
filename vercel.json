@@ -52,6 +52,5 @@
         "MAIL_FROM_ADDRESS": "hello@example.com",
         "MAIL_FROM_NAME": "Laravel"
     },
-    "buildCommand": "composer install --no-dev && php artisan config:cache && npm ci && npm run build",
     "outputDirectory": "public"
 }

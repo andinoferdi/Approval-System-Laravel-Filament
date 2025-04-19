@@ -100,6 +100,18 @@ class PengajuanResource extends Resource
 
     public static function table(Table $table): Table
     {
+        $isAdmin = function () {
+            /** @var User $user */
+            $user = Auth::user();
+            return $user && $user->hasRole('administrator');
+        };
+        
+        $isEmployee = function () {
+            /** @var User $user */
+            $user = Auth::user();
+            return $user && $user->hasRole('pegawai');
+        };
+
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('user.name')
@@ -145,11 +157,28 @@ class PengajuanResource extends Resource
                             default => 'gray',
                         };
                     }),
+                Tables\Columns\TextColumn::make('dokumen_pendukung')
+                    ->label('Dokumen Pendukung')
+                    ->formatStateUsing(function ($state) {
+                        if (!$state) {
+                            return 'Tidak ada';
+                        }
+                        
+                        return 'Ada';
+                    }),
             ])
             ->filters([
                 //
             ])
             ->actions([
+                Tables\Actions\Action::make('download_document')
+                    ->label('Unduh')
+                    ->color('success')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->button()
+                    ->visible(fn (Pengajuan $record) => !empty($record->dokumen_pendukung))
+                    ->extraAttributes(['target' => '_blank'])
+                    ->url(fn (Pengajuan $record) => asset('storage/' . $record->dokumen_pendukung)),
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make()
                     ->visible(function (Pengajuan $record) {
