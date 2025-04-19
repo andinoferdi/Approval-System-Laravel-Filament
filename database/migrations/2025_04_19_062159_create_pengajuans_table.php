@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('applications', function (Blueprint $table) {
+        Schema::create('pengajuans', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('event_name');
-            $table->dateTime('start_date');
-            $table->dateTime('end_date');
-            $table->tinyInteger('status')->default(1)->comment('1=pending_manager, 2=pending_dept_head, 3=pending_hrd, 4=approved, 5=rejected');
-            $table->string('document_path')->nullable();
+            $table->string('kegiatan');
+            $table->dateTime('jadwal_mulai');
+            $table->dateTime('jadwal_akhir');
+            $table->tinyInteger('status')->default(1)->comment('1=pending_manager, 2=pending_kadep, 3=pending_hrd, 4=disetujui, 5=ditolak');
+            $table->string('dokumen_pendukung')->nullable();
             $table->timestamps();
         });
     }
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('applications');
+        Schema::dropIfExists('pengajuans');
     }
 };

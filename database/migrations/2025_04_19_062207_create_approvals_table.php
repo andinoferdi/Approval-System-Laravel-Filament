@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('approvals', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('application_id')->constrained()->onDelete('cascade');
+            $table->foreignId('pengajuan_id')->constrained()->onDelete('cascade');
             $table->foreignId('approver_id')->constrained('users')->onDelete('cascade');
-            $table->integer('level'); // 1: Direct Manager, 2: Dept Head, 3: HRD/Director
-            $table->string('status')->default('pending'); // pending, approved, rejected
+            $table->integer('level');
+            $table->string('status')->default('tertunda');
             $table->text('comments')->nullable();
             $table->timestamp('decided_at')->nullable();
             $table->timestamps();

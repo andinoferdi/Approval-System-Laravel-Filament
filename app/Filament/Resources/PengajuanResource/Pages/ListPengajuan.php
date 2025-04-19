@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Filament\Resources\ApplicationResource\Pages;
+namespace App\Filament\Resources\PengajuanResource\Pages;
 
-use App\Filament\Resources\ApplicationResource;
+use App\Filament\Resources\PengajuanResource;
 use App\Models\User;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Auth;
 
-class ListApplications extends ListRecords
+class ListPengajuan extends ListRecords
 {
-    protected static string $resource = ApplicationResource::class;
+    protected static string $resource = PengajuanResource::class;
 
     protected function getHeaderActions(): array
     {
@@ -19,8 +19,7 @@ class ListApplications extends ListRecords
                 ->visible(function () {
                     /** @var User $user */
                     $user = Auth::user();
-                    // Only employees and administrators can create applications
-                    return $user && ($user->hasRole('employee') || $user->hasRole('administrator'));
+                    return $user && $user->hasRole('pegawai');
                 }),
         ];
     }

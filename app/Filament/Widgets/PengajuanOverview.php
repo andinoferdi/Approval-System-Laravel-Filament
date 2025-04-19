@@ -2,7 +2,7 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Application;
+use App\Models\Pengajuan;
 use App\Models\Approval;
 use App\Models\User;
 use Filament\Forms;
@@ -12,7 +12,7 @@ use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Support\Facades\Auth;
 
-class ApplicationsOverview extends BaseWidget
+class PengajuanOverview extends BaseWidget
 {
     protected static ?int $sort = 1;
     
@@ -22,46 +22,47 @@ class ApplicationsOverview extends BaseWidget
     {
         return $table
             ->query(
-                Application::query()
+                Pengajuan::query()
                     ->latest()
                     ->limit(10)
             )
             ->columns([
                 Tables\Columns\TextColumn::make('user.name')
-                    ->label('Employee')
+                    ->label('Pegawai')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('event_name')
-                    ->label('Event')
+                Tables\Columns\TextColumn::make('kegiatan')
+                    ->label('Kegiatan')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('start_date')
+                Tables\Columns\TextColumn::make('jadwal_mulai')
+                    ->label('Jadwal Mulai')
                     ->dateTime()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->formatStateUsing(function (int $state) {
                         return match ($state) {
-                            Application::STATUS_PENDING_MANAGER => 'Menunggu: Persetujuan Manager',
-                            Application::STATUS_PENDING_DEPT_HEAD => 'Menunggu: Persetujuan Kepala Dept.',
-                            Application::STATUS_PENDING_HRD => 'Menunggu: Persetujuan HRD/Direktur',
-                            Application::STATUS_APPROVED => 'Disetujui',
-                            Application::STATUS_REJECTED => 'Ditolak',
+                            Pengajuan::STATUS_PENDING_MANAGER => 'Menunggu: Persetujuan Manager',
+                            Pengajuan::STATUS_PENDING_KADEP => 'Menunggu: Persetujuan Kepala Dept.',
+                            Pengajuan::STATUS_PENDING_HRD => 'Menunggu: Persetujuan HRD/Direktur',
+                            Pengajuan::STATUS_DISETUJUI => 'Disetujui',
+                            Pengajuan::STATUS_DITOLAK => 'Ditolak',
                             default => 'Status Tidak Diketahui',
                         };
                     })
                     ->color(function (int $state) {
                         return match ($state) {
-                            Application::STATUS_PENDING_MANAGER, 
-                            Application::STATUS_PENDING_DEPT_HEAD, 
-                            Application::STATUS_PENDING_HRD => 'warning',
-                            Application::STATUS_APPROVED => 'success',
-                            Application::STATUS_REJECTED => 'danger',
+                            Pengajuan::STATUS_PENDING_MANAGER, 
+                            Pengajuan::STATUS_PENDING_KADEP, 
+                            Pengajuan::STATUS_PENDING_HRD => 'warning',
+                            Pengajuan::STATUS_DISETUJUI => 'success',
+                            Pengajuan::STATUS_DITOLAK => 'danger',
                             default => 'gray',
                         };
                     }),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Submitted at')
+                    ->label('Diajukan pada')
                     ->dateTime()
                     ->sortable(),
             ])
@@ -70,26 +71,26 @@ class ApplicationsOverview extends BaseWidget
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()
-                    ->url(fn (Application $record): string => route('filament.admin.resources.applications.view', $record)),
+                    ->url(fn (Pengajuan $record): string => route('filament.admin.resources.pengajuans.view', $record)),
                 Tables\Actions\Action::make('approve')
                     ->label('Setujui')
                     ->color('success')
                     ->icon('heroicon-o-check')
-                    ->visible(function (Application $record) {
+                    ->visible(function (Pengajuan $record) {
                         /** @var User $user */
                         $user = Auth::user();
                         
                         // Check if the user can approve based on role and application status
-                        if ($user->hasRole('direct_manager') && $record->status === Application::STATUS_PENDING_MANAGER) {
+                        if ($user->hasRole('manager') && $record->status === Pengajuan::STATUS_PENDING_MANAGER) {
                             return true;
                         }
                         
-                        if ($user->hasRole('dept_head') && $record->status === Application::STATUS_PENDING_DEPT_HEAD) {
+                        if ($user->hasRole('kepala_departemen') && $record->status === Pengajuan::STATUS_PENDING_KADEP) {
                             return true;
                         }
                         
-                        if (($user->hasRole('hrd') || $user->hasRole('director')) && 
-                            $record->status === Application::STATUS_PENDING_HRD) {
+                        if (($user->hasRole('hrd') || $user->hasRole('direktur')) && 
+                            $record->status === Pengajuan::STATUS_PENDING_HRD) {
                             return true;
                         }
                         
@@ -100,56 +101,56 @@ class ApplicationsOverview extends BaseWidget
                             ->label('Catatan (Opsional)')
                             ->maxLength(255),
                     ])
-                    ->action(function (array $data, Application $record) {
+                    ->action(function (array $data, Pengajuan $record) {
                         /** @var User $user */
                         $user = Auth::user();
                         $currentLevel = $record->getCurrentLevel();
                         
                         // Create approval record
                         Approval::create([
-                            'application_id' => $record->id,
+                            'pengajuan_id' => $record->id,
                             'approver_id' => $user->id,
                             'level' => $currentLevel,
-                            'status' => 'approved',
+                            'status' => 'disetujui',
                             'decided_at' => now(),
                             'comments' => $data['comments'] ?? null,
                         ]);
                         
                         // Update application status
                         if ($currentLevel === 1) {
-                            $record->status = Application::STATUS_PENDING_DEPT_HEAD;
+                            $record->status = Pengajuan::STATUS_PENDING_KADEP;
                         } elseif ($currentLevel === 2) {
-                            $record->status = Application::STATUS_PENDING_HRD;
+                            $record->status = Pengajuan::STATUS_PENDING_HRD;
                         } elseif ($currentLevel === 3) {
-                            $record->status = Application::STATUS_APPROVED;
+                            $record->status = Pengajuan::STATUS_DISETUJUI;
                         }
                         
                         $record->save();
                         
                         Notification::make()
                             ->success()
-                            ->title('Pengajuan disetujui')
+                            ->title('Pengajuan Disetujui')
                             ->send();
                     }),
                 Tables\Actions\Action::make('reject')
                     ->label('Tolak')
                     ->color('danger')
                     ->icon('heroicon-o-x-mark')
-                    ->visible(function (Application $record) {
+                    ->visible(function (Pengajuan $record) {
                         /** @var User $user */
                         $user = Auth::user();
                         
                         // Check if the user can reject based on role and application status
-                        if ($user->hasRole('direct_manager') && $record->status === Application::STATUS_PENDING_MANAGER) {
+                        if ($user->hasRole('manager') && $record->status === Pengajuan::STATUS_PENDING_MANAGER) {
                             return true;
                         }
                         
-                        if ($user->hasRole('dept_head') && $record->status === Application::STATUS_PENDING_DEPT_HEAD) {
+                        if ($user->hasRole('kepala_departemen') && $record->status === Pengajuan::STATUS_PENDING_KADEP) {
                             return true;
                         }
                         
-                        if (($user->hasRole('hrd') || $user->hasRole('director')) && 
-                            $record->status === Application::STATUS_PENDING_HRD) {
+                        if (($user->hasRole('hrd') || $user->hasRole('direktur')) && 
+                            $record->status === Pengajuan::STATUS_PENDING_HRD) {
                             return true;
                         }
                         
@@ -162,31 +163,30 @@ class ApplicationsOverview extends BaseWidget
                             ->required()
                             ->maxLength(255),
                     ])
-                    ->action(function (array $data, Application $record) {
+                    ->action(function (array $data, Pengajuan $record) {
                         /** @var User $user */
                         $user = Auth::user();
                         $currentLevel = $record->getCurrentLevel();
                         
                         // Create rejection record
                         Approval::create([
-                            'application_id' => $record->id,
+                            'pengajuan_id' => $record->id,
                             'approver_id' => $user->id,
                             'level' => $currentLevel,
-                            'status' => 'rejected',
+                            'status' => 'ditolak',
                             'decided_at' => now(),
                             'comments' => $data['comments'],
                         ]);
                         
-                        // Update application status to rejected
-                        $record->status = Application::STATUS_REJECTED;
+                        $record->status = Pengajuan::STATUS_DITOLAK;
                         $record->save();
                         
                         Notification::make()
                             ->success()
-                            ->title('Pengajuan ditolak')
+                            ->title('Pengajuan Ditolak')
                             ->send();
                     }),
             ])
-            ->heading('Recent Applications');
+            ->heading('Pengajuan Terbaru');
     }
-}
+} 

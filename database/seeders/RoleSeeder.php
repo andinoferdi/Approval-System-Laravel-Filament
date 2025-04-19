@@ -15,28 +15,28 @@ class RoleSeeder extends Seeder
     {
         $roles = [
             [
-                'name' => 'employee',
-                'description' => 'Regular employee',
+                'nama_role' => 'pegawai',
+                'deskripsi' => 'Pegawai Biasa',
             ],
             [
-                'name' => 'direct_manager',
-                'description' => 'Direct manager of employees',
+                'nama_role' => 'manager',
+                'deskripsi' => 'Atasan Langsung',
             ],
             [
-                'name' => 'dept_head',
-                'description' => 'Department head',
+                'nama_role' => 'kepala_departemen',
+                'deskripsi' => 'kepala Departemen',
             ],
             [
-                'name' => 'hrd',
-                'description' => 'Human Resources Department',
+                'nama_role' => 'hrd',
+                'deskripsi' => 'Human Resources Department',
             ],
             [
-                'name' => 'director',
-                'description' => 'Company director',
+                'nama_role' => 'direktur',
+                'deskripsi' => 'Direktur',
             ],
             [
-                'name' => 'administrator',
-                'description' => 'System administrator',
+                'nama_role' => 'administrator',
+                'deskripsi' => 'Administrator',
             ],
         ];
 

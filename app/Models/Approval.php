@@ -11,12 +11,12 @@ class Approval extends Model
     use HasFactory;
     
     /**
-     * The attributes that are mass assignable.
+     * Atribut yang dapat diisi
      *
      * @var array<int, string>
      */
     protected $fillable = [
-        'application_id',
+        'pengajuan_id',
         'approver_id',
         'level',
         'status',
@@ -25,7 +25,7 @@ class Approval extends Model
     ];
     
     /**
-     * The attributes that should be cast.
+     * Atribut yang harus dikonversi
      *
      * @var array<string, string>
      */
@@ -34,15 +34,15 @@ class Approval extends Model
     ];
     
     /**
-     * Get the application that owns the approval.
+     * Mendapatkan pengajuan yang memiliki persetujuan
      */
-    public function application(): BelongsTo
+    public function pengajuan(): BelongsTo
     {
-        return $this->belongsTo(Application::class);
+        return $this->belongsTo(Pengajuan::class);
     }
     
     /**
-     * Get the user who made the approval.
+     * Mendapatkan user yang memberikan persetujuan
      */
     public function approver(): BelongsTo
     {

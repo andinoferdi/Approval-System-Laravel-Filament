@@ -63,9 +63,9 @@ class User extends Authenticatable
     /**
      * Get the applications submitted by the user.
      */
-    public function applications(): HasMany
+    public function pengajuans(): HasMany
     {
-        return $this->hasMany(Application::class);
+        return $this->hasMany(Pengajuan::class);
     }
 
     /**
@@ -81,6 +81,6 @@ class User extends Authenticatable
      */
     public function hasRole(string $roleName): bool
     {
-        return $this->role?->name === $roleName;
+        return $this->role?->nama_role === $roleName;
     }
 }

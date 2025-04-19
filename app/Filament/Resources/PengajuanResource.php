@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\ApplicationResource\Pages;
-use App\Filament\Resources\ApplicationResource\RelationManagers;
-use App\Models\Application;
+use App\Filament\Resources\PengajuanResource\Pages;
+use App\Filament\Resources\PengajuanResource\RelationManagers;
+use App\Models\Pengajuan;
 use App\Models\Approval;
 use App\Models\User;
 use Filament\Forms;
@@ -17,13 +17,13 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
-class ApplicationResource extends Resource
+class PengajuanResource extends Resource
 {
-    protected static ?string $model = Application::class;
+    protected static ?string $model = Pengajuan::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
     
-    protected static ?string $navigationGroup = 'Application Management';
+    protected static ?string $navigationGroup = 'Manajemen Pengajuan';
     
     protected static ?string $modelLabel = 'Pengajuan';
     
@@ -35,7 +35,7 @@ class ApplicationResource extends Resource
     {
         /** @var User $user */
         $user = Auth::user();
-        $isEmployee = $user->hasRole('employee');
+        $isEmployee = $user->hasRole('pegawai');
         $isCreate = $form->getOperation() === 'create';
         $record = $form->getRecord();
 
@@ -48,42 +48,40 @@ class ApplicationResource extends Resource
                             ->relationship('user', 'name')
                             ->searchable()
                             ->required()
-                            ->default(function () use ($isEmployee) {
-                                return $isEmployee ? Auth::id() : null;
-                            })
+                            ->default(Auth::id())
                             ->disabled($isEmployee)
                             ->hiddenOn('edit')
                             ->visible(fn() => $isCreate),
                             
                         Forms\Components\Placeholder::make('user_name_display')
                             ->label('Nama Pegawai')
-                            ->content(fn (Application $record) => $record?->user?->name ?? '-')
+                            ->content(fn (Pengajuan $record) => $record?->user?->name ?? '-')
                             ->visible(fn() => !$isCreate),
                             
                         Forms\Components\Placeholder::make('user_position_display')
                             ->label('Posisi')
-                            ->content(fn (Application $record) => $record?->user?->position ?? '-')
+                            ->content(fn (Pengajuan $record) => $record?->user?->position ?? '-')
                             ->visible(fn() => !$isCreate),
                             
                         Forms\Components\Placeholder::make('user_department_display')
                             ->label('Divisi/Departemen')
-                            ->content(fn (Application $record) => $record?->user?->department ?? '-')
+                            ->content(fn (Pengajuan $record) => $record?->user?->department ?? '-')
                             ->visible(fn() => !$isCreate),
                     ])->columns(2),
                 
                 Forms\Components\Section::make('Informasi Kegiatan')
                     ->schema([
-                        Forms\Components\TextInput::make('event_name')
+                        Forms\Components\TextInput::make('kegiatan')
                             ->label('Nama Kegiatan')
                             ->required()
                             ->maxLength(255),
-                        Forms\Components\DateTimePicker::make('start_date')
-                            ->label('Tanggal Mulai')
+                        Forms\Components\DateTimePicker::make('jadwal_mulai')
+                            ->label('jadwal Mulai')
                             ->required(),
-                        Forms\Components\DateTimePicker::make('end_date')
-                            ->label('Tanggal Selesai')
+                        Forms\Components\DateTimePicker::make('jadwal_akhir')
+                            ->label('jadwal Selesai')
                             ->required(),
-                        Forms\Components\FileUpload::make('document_path')
+                        FileUpload::make('dokumen_pendukung')
                             ->label('Dokumen Pendukung')
                             ->disk('public')
                             ->directory('documents')
@@ -95,7 +93,7 @@ class ApplicationResource extends Resource
                     ])->columns(2),
                 
                 Forms\Components\Hidden::make('status')
-                    ->default(Application::STATUS_PENDING_MANAGER)
+                    ->default(Pengajuan::STATUS_PENDING_MANAGER)
                     ->visible($isEmployee && $isCreate),
             ]);
     }
@@ -113,15 +111,15 @@ class ApplicationResource extends Resource
                 Tables\Columns\TextColumn::make('user.department')
                     ->label('Divisi/Departemen')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('event_name')
+                Tables\Columns\TextColumn::make('kegiatan')
                     ->label('Kegiatan')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('start_date')
-                    ->label('Tanggal Mulai')
+                Tables\Columns\TextColumn::make('jadwal_mulai')
+                    ->label('jadwal Mulai')
                     ->dateTime()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('end_date')
-                    ->label('Tanggal Selesai')
+                Tables\Columns\TextColumn::make('jadwal_akhir')
+                    ->label('jadwal Selesai')
                     ->dateTime()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
@@ -129,21 +127,21 @@ class ApplicationResource extends Resource
                     ->badge()
                     ->formatStateUsing(function (int $state) {
                         return match ($state) {
-                            Application::STATUS_PENDING_MANAGER => 'Menunggu: Persetujuan Manager',
-                            Application::STATUS_PENDING_DEPT_HEAD => 'Menunggu: Persetujuan Kepala Dept.',
-                            Application::STATUS_PENDING_HRD => 'Menunggu: Persetujuan HRD/Direktur',
-                            Application::STATUS_APPROVED => 'Disetujui',
-                            Application::STATUS_REJECTED => 'Ditolak',
+                            Pengajuan::STATUS_PENDING_MANAGER => 'Menunggu: Persetujuan Manager',
+                            Pengajuan::STATUS_PENDING_KADEP => 'Menunggu: Persetujuan Kepala Dept.',
+                            Pengajuan::STATUS_PENDING_HRD => 'Menunggu: Persetujuan HRD/Direktur',
+                            Pengajuan::STATUS_DISETUJUI => 'Disetujui',
+                            Pengajuan::STATUS_DITOLAK => 'Ditolak',
                             default => 'Status Tidak Diketahui',
                         };
                     })
                     ->color(function (int $state) {
                         return match ($state) {
-                            Application::STATUS_PENDING_MANAGER, 
-                            Application::STATUS_PENDING_DEPT_HEAD, 
-                            Application::STATUS_PENDING_HRD => 'warning',
-                            Application::STATUS_APPROVED => 'success',
-                            Application::STATUS_REJECTED => 'danger',
+                            Pengajuan::STATUS_PENDING_MANAGER, 
+                            Pengajuan::STATUS_PENDING_KADEP, 
+                            Pengajuan::STATUS_PENDING_HRD => 'warning',
+                            Pengajuan::STATUS_DISETUJUI => 'success',
+                            Pengajuan::STATUS_DITOLAK => 'danger',
                             default => 'gray',
                         };
                     }),
@@ -154,31 +152,43 @@ class ApplicationResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make()
-                    ->visible(function (Application $record) {
+                    ->visible(function (Pengajuan $record) {
                         /** @var User $user */
                         $user = Auth::user();
-                        // Only employee can edit their own applications
-                        return $user->hasRole('employee') && $record->user_id === $user->id;
+                        // Only employee can edit their own applications if status is pending_manager
+                        return $user->hasRole('pegawai') && 
+                               $record->user_id === $user->id && 
+                               $record->status === Pengajuan::STATUS_PENDING_MANAGER;
+                    }),
+                Tables\Actions\DeleteAction::make()
+                    ->visible(function (Pengajuan $record) {
+                        /** @var User $user */
+                        $user = Auth::user();
+                        // Employee can delete their own applications if status is pending_manager or rejected
+                        return $user->hasRole('pegawai') && 
+                               $record->user_id === $user->id &&
+                               ($record->status === Pengajuan::STATUS_PENDING_MANAGER || 
+                                $record->status === Pengajuan::STATUS_DITOLAK);
                     }),
                 Tables\Actions\Action::make('approve')
                     ->label('Setujui')
                     ->color('success')
                     ->icon('heroicon-o-check')
-                    ->visible(function (Application $record) {
+                    ->visible(function (Pengajuan $record) {
                         /** @var User $user */
                         $user = Auth::user();
                         
                         // Check if the user can approve based on role and application status
-                        if ($user->hasRole('direct_manager') && $record->status === Application::STATUS_PENDING_MANAGER) {
+                        if ($user->hasRole('manager') && $record->status === Pengajuan::STATUS_PENDING_MANAGER) {
                             return true;
                         }
                         
-                        if ($user->hasRole('dept_head') && $record->status === Application::STATUS_PENDING_DEPT_HEAD) {
+                        if ($user->hasRole('kepala_departemen') && $record->status === Pengajuan::STATUS_PENDING_KADEP) {
                             return true;
                         }
                         
-                        if (($user->hasRole('hrd') || $user->hasRole('director')) && 
-                            $record->status === Application::STATUS_PENDING_HRD) {
+                        if (($user->hasRole('hrd') || $user->hasRole('direktur')) && 
+                            $record->status === Pengajuan::STATUS_PENDING_HRD) {
                             return true;
                         }
                         
@@ -189,56 +199,56 @@ class ApplicationResource extends Resource
                             ->label('Catatan (Opsional)')
                             ->maxLength(255),
                     ])
-                    ->action(function (array $data, Application $record) {
+                    ->action(function (array $data, Pengajuan $record) {
                         /** @var User $user */
                         $user = Auth::user();
                         $currentLevel = $record->getCurrentLevel();
                         
                         // Create approval record
                         Approval::create([
-                            'application_id' => $record->id,
+                            'pengajuan_id' => $record->id,
                             'approver_id' => $user->id,
                             'level' => $currentLevel,
-                            'status' => 'approved',
+                            'status' => 'disetujui',
                             'decided_at' => now(),
                             'comments' => $data['comments'] ?? null,
                         ]);
                         
                         // Update application status
                         if ($currentLevel === 1) {
-                            $record->status = Application::STATUS_PENDING_DEPT_HEAD;
+                            $record->status = Pengajuan::STATUS_PENDING_KADEP;
                         } elseif ($currentLevel === 2) {
-                            $record->status = Application::STATUS_PENDING_HRD;
+                            $record->status = Pengajuan::STATUS_PENDING_HRD;
                         } elseif ($currentLevel === 3) {
-                            $record->status = Application::STATUS_APPROVED;
+                            $record->status = Pengajuan::STATUS_DISETUJUI;
                         }
                         
                         $record->save();
                         
                         Notification::make()
                             ->success()
-                            ->title('Pengajuan disetujui')
+                            ->title('Pengajuan Disetujui')
                             ->send();
                     }),
                 Tables\Actions\Action::make('reject')
                     ->label('Tolak')
                     ->color('danger')
                     ->icon('heroicon-o-x-mark')
-                    ->visible(function (Application $record) {
+                    ->visible(function (Pengajuan $record) {
                         /** @var User $user */
                         $user = Auth::user();
                         
                         // Check if the user can reject based on role and application status
-                        if ($user->hasRole('direct_manager') && $record->status === Application::STATUS_PENDING_MANAGER) {
+                        if ($user->hasRole('manager') && $record->status === Pengajuan::STATUS_PENDING_MANAGER) {
                             return true;
                         }
                         
-                        if ($user->hasRole('dept_head') && $record->status === Application::STATUS_PENDING_DEPT_HEAD) {
+                        if ($user->hasRole('kepala_departemen') && $record->status === Pengajuan::STATUS_PENDING_KADEP) {
                             return true;
                         }
                         
-                        if (($user->hasRole('hrd') || $user->hasRole('director')) && 
-                            $record->status === Application::STATUS_PENDING_HRD) {
+                        if (($user->hasRole('hrd') || $user->hasRole('direktur')) && 
+                            $record->status === Pengajuan::STATUS_PENDING_HRD) {
                             return true;
                         }
                         
@@ -251,28 +261,27 @@ class ApplicationResource extends Resource
                             ->required()
                             ->maxLength(255),
                     ])
-                    ->action(function (array $data, Application $record) {
+                    ->action(function (array $data, Pengajuan $record) {
                         /** @var User $user */
                         $user = Auth::user();
                         $currentLevel = $record->getCurrentLevel();
                         
                         // Create rejection record
                         Approval::create([
-                            'application_id' => $record->id,
+                            'pengajuan_id' => $record->id,
                             'approver_id' => $user->id,
                             'level' => $currentLevel,
-                            'status' => 'rejected',
+                            'status' => 'ditolak',
                             'decided_at' => now(),
                             'comments' => $data['comments'],
                         ]);
                         
-                        // Update application status to rejected
-                        $record->status = Application::STATUS_REJECTED;
+                        $record->status = Pengajuan::STATUS_DITOLAK;
                         $record->save();
                         
                         Notification::make()
                             ->success()
-                            ->title('Pengajuan ditolak')
+                            ->title('Pengajuan Ditolak')
                             ->send();
                     }),
             ])
@@ -298,10 +307,10 @@ class ApplicationResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListApplications::route('/'),
-            'create' => Pages\CreateApplication::route('/create'),
-            'view' => Pages\ViewApplication::route('/{record}'),
-            'edit' => Pages\EditApplication::route('/{record}/edit'),
+            'index' => Pages\ListPengajuan::route('/'),
+            'create' => Pages\CreatePengajuan::route('/create'),
+            'view' => Pages\ViewPengajuan::route('/{record}'),
+            'edit' => Pages\EditPengajuan::route('/{record}/edit'),
         ];
     }
     
@@ -317,24 +326,24 @@ class ApplicationResource extends Resource
         }
         
         // Employees can only see their own applications
-        if ($user->hasRole('employee')) {
+        if ($user->hasRole('pegawai')) {
             return $query->where('user_id', $user->id);
         }
         
-        // Direct managers can see all applications
-        if ($user->hasRole('direct_manager')) {
+        // Manager Atasans can see all applications
+        if ($user->hasRole('manager')) {
             return $query;
         }
         
         // Department heads can see applications from their department
-        if ($user->hasRole('dept_head')) {
+        if ($user->hasRole('kepala_departemen')) {
             return $query->whereHas('user', function ($subquery) use ($user) {
                 $subquery->where('department', $user->department);
             });
         }
         
         // HRD and Directors can see all applications
-        if ($user->hasRole('hrd') || $user->hasRole('director')) {
+        if ($user->hasRole('hrd') || $user->hasRole('direktur')) {
             return $query;
         }
         

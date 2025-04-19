@@ -2,8 +2,8 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Widgets\ApplicationsOverview;
-use App\Filament\Widgets\ApplicationStatsOverview;
+use App\Filament\Widgets\PengajuanOverview;
+use App\Filament\Widgets\PengajuanStatsOverview;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -27,9 +27,9 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('admin')
+            ->path('dashboard')
             ->login()
-            ->brandName('Application Approval System')
+            ->brandName('Pengajuan Approval')
             ->colors([
                 'primary' => Color::Blue,
                 'danger' => Color::Rose,
@@ -45,8 +45,8 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
                 Widgets\AccountWidget::class,
-                ApplicationStatsOverview::class,
-                ApplicationsOverview::class,
+                PengajuanStatsOverview::class,
+                PengajuanOverview::class,
             ])
             ->databaseNotifications()
             ->middleware([

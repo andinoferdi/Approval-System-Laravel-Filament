@@ -1,18 +1,17 @@
 <?php
 
-namespace App\Filament\Resources\ApplicationResource\Pages;
+namespace App\Filament\Resources\PengajuanResource\Pages;
 
-use App\Filament\Resources\ApplicationResource;
-use App\Models\Application;
+use App\Filament\Resources\PengajuanResource;
+use App\Models\Pengajuan;
 use App\Models\User;
-use Filament\Actions\Action;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
 use Filament\Notifications\Notification;
 
-class CreateApplication extends CreateRecord
+class CreatePengajuan extends CreateRecord
 {
-    protected static string $resource = ApplicationResource::class;
+    protected static string $resource = PengajuanResource::class;
     
     protected function getFormActions(): array
     {
@@ -32,13 +31,10 @@ class CreateApplication extends CreateRecord
         /** @var User $user */
         $user = Auth::user();
         
-        // If the user is an employee, force the user_id to be the current user
-        if ($user && $user->hasRole('employee')) {
-            $data['user_id'] = $user->id;
-        }
+        // Always set the user_id to the current user
+        $data['user_id'] = $user->id;
         
-        // Always set initial status to pending manager approval
-        $data['status'] = Application::STATUS_PENDING_MANAGER;
+        $data['status'] = Pengajuan::STATUS_PENDING_MANAGER;
         
         return $data;
     }
@@ -47,7 +43,7 @@ class CreateApplication extends CreateRecord
     {
         // Menampilkan notifikasi berhasil
         Notification::make()
-            ->title('Application created successfully')
+            ->title('Pengajuan Berhasil Dibuat')
             ->success()
             ->send();
     }

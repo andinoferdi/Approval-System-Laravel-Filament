@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\ApplicationResource\Pages;
+namespace App\Filament\Resources\PengajuanResource\Pages;
 
-use App\Filament\Resources\ApplicationResource;
-use App\Models\Application;
+use App\Filament\Resources\PengajuanResource;
+use App\Models\Pengajuan;
 use App\Models\Approval;
 use App\Models\User;
 use Filament\Actions\Action;
@@ -13,9 +13,17 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Support\Facades\Auth;
 
-class ViewApplication extends ViewRecord
+class ViewPengajuan extends ViewRecord
 {
-    protected static string $resource = ApplicationResource::class;
+    protected static string $resource = PengajuanResource::class;
+    
+    public function getHeading(): string
+    {
+        /** @var Pengajuan $pengajuan */
+        $pengajuan = $this->getRecord();
+        
+        return 'Pengajuan #' . $pengajuan->id;
+    }
     
     protected function mutateFormData(array $data): array
     {
@@ -37,8 +45,30 @@ class ViewApplication extends ViewRecord
                     $application = $this->getRecord();
                     /** @var User $user */
                     $user = Auth::user();
-                    // Only employee can edit their own applications
-                    return $user && $user->hasRole('employee') && $application->user_id === $user->id;
+                    // Only employee can edit their own applications if status is pending_manager
+                    return $user && 
+                           $user->hasRole('pegawai') && 
+                           $application->user_id === $user->id && 
+                           $application->status === Pengajuan::STATUS_PENDING_MANAGER;
+                }),
+                
+            Action::make('delete')
+                ->label('Hapus')
+                ->color('danger')
+                ->icon('heroicon-o-trash')
+                ->action(fn () => $this->record->delete())
+                ->requiresConfirmation()
+                ->visible(function () {
+                    $application = $this->getRecord();
+                    /** @var User $user */
+                    $user = Auth::user();
+                    
+                    // Employee can delete their own applications if status is pending_manager or rejected
+                    return $user && 
+                           $user->hasRole('pegawai') && 
+                           $application->user_id === $user->id &&
+                           ($application->status === Pengajuan::STATUS_PENDING_MANAGER || 
+                            $application->status === Pengajuan::STATUS_DITOLAK);
                 }),
                 
             Action::make('approve')
@@ -55,16 +85,16 @@ class ViewApplication extends ViewRecord
                     }
                     
                     // Check if the user can approve based on role and application status
-                    if ($user->hasRole('direct_manager') && $application->status === Application::STATUS_PENDING_MANAGER) {
+                    if ($user->hasRole('manager') && $application->status === Pengajuan::STATUS_PENDING_MANAGER) {
                         return true;
                     }
                     
-                    if ($user->hasRole('dept_head') && $application->status === Application::STATUS_PENDING_DEPT_HEAD) {
+                    if ($user->hasRole('kepala_departemen') && $application->status === Pengajuan::STATUS_PENDING_KADEP) {
                         return true;
                     }
                     
-                    if (($user->hasRole('hrd') || $user->hasRole('director')) && 
-                        $application->status === Application::STATUS_PENDING_HRD) {
+                    if (($user->hasRole('hrd') || $user->hasRole('direktur')) && 
+                        $application->status === Pengajuan::STATUS_PENDING_HRD) {
                         return true;
                     }
                     
@@ -83,28 +113,28 @@ class ViewApplication extends ViewRecord
                     
                     // Create approval record
                     Approval::create([
-                        'application_id' => $application->id,
+                        'pengajuan_id' => $application->id,
                         'approver_id' => $user->id,
                         'level' => $currentLevel,
-                        'status' => 'approved',
+                        'status' => 'disetujui',
                         'decided_at' => now(),
                         'comments' => $data['comments'] ?? null,
                     ]);
                     
                     // Update application status
                     if ($currentLevel === 1) {
-                        $application->status = Application::STATUS_PENDING_DEPT_HEAD;
+                        $application->status = Pengajuan::STATUS_PENDING_KADEP;
                     } elseif ($currentLevel === 2) {
-                        $application->status = Application::STATUS_PENDING_HRD;
+                        $application->status = Pengajuan::STATUS_PENDING_HRD;
                     } elseif ($currentLevel === 3) {
-                        $application->status = Application::STATUS_APPROVED;
+                        $application->status = Pengajuan::STATUS_DISETUJUI;
                     }
                     
                     $application->save();
                     
                     Notification::make()
                         ->success()
-                        ->title('Pengajuan disetujui')
+                        ->title('Pengajuan Disetujui')
                         ->send();
                 }),
                 
@@ -122,16 +152,16 @@ class ViewApplication extends ViewRecord
                     }
                     
                     // Check if the user can reject based on role and application status
-                    if ($user->hasRole('direct_manager') && $application->status === Application::STATUS_PENDING_MANAGER) {
+                    if ($user->hasRole('manager') && $application->status === Pengajuan::STATUS_PENDING_MANAGER) {
                         return true;
                     }
                     
-                    if ($user->hasRole('dept_head') && $application->status === Application::STATUS_PENDING_DEPT_HEAD) {
+                    if ($user->hasRole('kepala_departemen') && $application->status === Pengajuan::STATUS_PENDING_KADEP) {
                         return true;
                     }
                     
-                    if (($user->hasRole('hrd') || $user->hasRole('director')) && 
-                        $application->status === Application::STATUS_PENDING_HRD) {
+                    if (($user->hasRole('hrd') || $user->hasRole('direktur')) && 
+                        $application->status === Pengajuan::STATUS_PENDING_HRD) {
                         return true;
                     }
                     
@@ -152,21 +182,20 @@ class ViewApplication extends ViewRecord
                     
                     // Create rejection record
                     Approval::create([
-                        'application_id' => $application->id,
+                        'pengajuan_id' => $application->id,
                         'approver_id' => $user->id,
                         'level' => $currentLevel,
-                        'status' => 'rejected',
+                        'status' => 'ditolak',
                         'decided_at' => now(),
                         'comments' => $data['comments'],
                     ]);
                     
-                    // Update application status to rejected
-                    $application->status = Application::STATUS_REJECTED;
+                    $application->status = Pengajuan::STATUS_DITOLAK;
                     $application->save();
                     
                     Notification::make()
                         ->success()
-                        ->title('Pengajuan ditolak')
+                        ->title('Pengajuan Ditolak')
                         ->send();
                 }),
         ];

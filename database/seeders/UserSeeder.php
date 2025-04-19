@@ -14,19 +14,19 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        $employeeRoleId = Role::where('name', 'employee')->first()->id;
-        $directManagerRoleId = Role::where('name', 'direct_manager')->first()->id;
-        $deptHeadRoleId = Role::where('name', 'dept_head')->first()->id;
-        $hrdRoleId = Role::where('name', 'hrd')->first()->id;
-        $directorRoleId = Role::where('name', 'director')->first()->id;
-        $adminRoleId = Role::where('name', 'administrator')->first()->id;
+        $pegawai = Role::where('nama_role', 'pegawai')->first()->id;
+        $manager = Role::where('nama_role', 'manager')->first()->id;
+        $kepalaDepartemen = Role::where('nama_role', 'kepala_departemen')->first()->id;
+        $hrd = Role::where('nama_role', 'hrd')->first()->id;
+        $direktur = Role::where('nama_role', 'direktur')->first()->id;
+        $admin = Role::where('nama_role', 'administrator')->first()->id;
         
         // Create employee
         User::create([
-            'name' => 'Employee',
-            'email' => 'employee@employee',
-            'password' => Hash::make('employee@employee'),
-            'role_id' => $employeeRoleId,
+            'name' => 'pegawai',
+            'email' => 'pegawai@pegawai',
+            'password' => Hash::make('pegawai@pegawai'),
+            'role_id' => $pegawai,
             'position' => 'Software Developer',
             'department' => 'IT',
         ]);
@@ -36,17 +36,17 @@ class UserSeeder extends Seeder
             'name' => 'Manager',
             'email' => 'manager@manager',
             'password' => Hash::make('manager@manager'),
-            'role_id' => $directManagerRoleId,
+            'role_id' => $manager,
             'position' => 'Tim Manager',
             'department' => 'IT',
         ]);
         
         // Create department head
         User::create([
-            'name' => 'Department Head',
-            'email' => 'depthead@depthead',
-            'password' => Hash::make('depthead@depthead'),
-            'role_id' => $deptHeadRoleId,
+            'name' => 'Kepala Departemen',
+            'email' => 'kadep@kadep',
+            'password' => Hash::make('kadep@kadep'),
+            'role_id' => $kepalaDepartemen,
             'position' => 'Kepala Departemen',
             'department' => 'IT',
         ]);
@@ -56,27 +56,27 @@ class UserSeeder extends Seeder
             'name' => 'HRD',
             'email' => 'hrd@hrd',
             'password' => Hash::make('hrd@hrd'),
-            'role_id' => $hrdRoleId,
+            'role_id' => $hrd,
             'position' => 'HR Manager',
             'department' => 'Human Resources',
         ]);
         
         // Create Director
         User::create([
-            'name' => 'Direktor',
-            'email' => 'director@director',
-            'password' => Hash::make('director@director'),
-            'role_id' => $directorRoleId,
+            'name' => 'Direktur',
+            'email' => 'direktur@direktur',
+            'password' => Hash::make('direktur@direktur'),
+            'role_id' => $direktur,
             'position' => 'Director',
             'department' => 'Executive',
         ]);
 
         // Create admin
         User::create([
-            'name' => 'Admin User',
+            'name' => 'Administrator',
             'email' => 'admin@admin',
             'password' => Hash::make('admin@admin'),
-            'role_id' => $adminRoleId,
+            'role_id' => $admin,
         ]);
     }
 }

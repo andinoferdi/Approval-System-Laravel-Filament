@@ -13,6 +13,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Hash;
+use Filament\Facades\Filament;
 
 class UserResource extends Resource
 {
@@ -23,6 +24,12 @@ class UserResource extends Resource
     protected static ?string $navigationGroup = 'System Management';
     
     protected static ?int $navigationSort = 2;
+
+    public static function canAccess(): bool
+    {
+        $user = Filament::auth()->user();
+        return $user && $user->role_id && $user->role?->nama_role === 'administrator';
+    }
 
     public static function form(Form $form): Form
     {
@@ -42,7 +49,7 @@ class UserResource extends Resource
                     ->dehydrated(fn (?string $state): bool => filled($state))
                     ->required(fn (string $operation): bool => $operation === 'create'),
                 Forms\Components\Select::make('role_id')
-                    ->relationship('role', 'name')
+                    ->relationship('role', 'nama_role')
                     ->required(),
                 Forms\Components\TextInput::make('department')
                     ->maxLength(255),
@@ -59,9 +66,10 @@ class UserResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('role.name')
+                Tables\Columns\TextColumn::make('role.nama_role')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->label('Role'),
                 Tables\Columns\TextColumn::make('department')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('position')

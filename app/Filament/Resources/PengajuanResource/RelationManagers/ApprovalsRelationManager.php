@@ -1,14 +1,12 @@
 <?php
 
-namespace App\Filament\Resources\ApplicationResource\RelationManagers;
+namespace App\Filament\Resources\PengajuanResource\RelationManagers;
 
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ApprovalsRelationManager extends RelationManager
 {
@@ -37,16 +35,16 @@ class ApprovalsRelationManager extends RelationManager
                     ->required(),
                 Forms\Components\Select::make('level')
                     ->options([
-                        1 => 'Direct Manager',
-                        2 => 'Department Head',
-                        3 => 'HRD/Director',
+                        1 => 'Manager Atasan',
+                        2 => 'Kepala Departemen',
+                        3 => 'HRD/Direktur',
                     ])
                     ->required(),
                 Forms\Components\Select::make('status')
                     ->options([
-                        'pending' => 'Pending',
-                        'approved' => 'Approved',
-                        'rejected' => 'Rejected',
+                        'menunggu' => 'Menunggu',
+                        'disetujui' => 'Disetujui',
+                        'ditolak' => 'Ditolak',
                     ])
                     ->required(),
                 Forms\Components\Textarea::make('comments')
@@ -67,17 +65,17 @@ class ApprovalsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('level')
                     ->badge()
                     ->formatStateUsing(fn (int $state): string => match ($state) {
-                        1 => 'Direct Manager',
-                        2 => 'Department Head',
-                        3 => 'HRD/Director',
-                        default => 'Unknown',
+                        1 => 'Manager Atasan',
+                        2 => 'Kepala Departemen',
+                        3 => 'HRD/Direktur',
+                        default => 'Tidak Diketahui',
                     }),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
-                        'pending' => 'warning',
-                        'approved' => 'success',
-                        'rejected' => 'danger',
+                        'menunggu' => 'warning',
+                        'disetujui' => 'success',
+                        'ditolak' => 'danger',
                         default => 'gray',
                     }),
                 Tables\Columns\TextColumn::make('decided_at')
